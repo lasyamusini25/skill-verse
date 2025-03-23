@@ -52,38 +52,47 @@ export const registerCompany = async (req, res) => {
     }
 }
 
-// Login Company
 export const loginCompany = async (req, res) => {
-
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     try {
+        console.log("Login request received:", email); // ✅ Debug log
 
-        const company = await Company.findOne({ email })
+        const company = await Company.findOne({ email });
 
-        if (await bcrypt.compare(password, company.password)) {
-
-            res.json({
-                success: true,
-                company: {
-                    _id: company._id,
-                    name: company.name,
-                    email: company.email,
-                    image: company.image
-                },
-                token: generateToken(company._id)
-            })
-
+        if (!company) {
+            console.error("Company not found:", email); // ✅ Debug log
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
         }
-        else {
-            res.json({ success: false, message: 'Invalid email or password' })
+
+        const isPasswordValid = await bcrypt.compare(password, company.password);
+        if (!isPasswordValid) {
+            console.error("Incorrect password for:", email); // ✅ Debug log
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
         }
+
+        const token = generateToken(company._id);
+
+        console.log("Login successful for:", email); // ✅ Debug log
+
+        res.status(200).json({
+            success: true,
+            company: {
+                _id: company._id,
+                name: company.name,
+                email: company.email,
+                image: company.image,
+            },
+            token,
+        });
 
     } catch (error) {
-        res.json({ success: false, message: error.message })
+        console.error("Server error in loginCompany:", error); // ✅ Debug log
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
+};
 
-}
+
 
 // Get Company Data
 export const getCompanyData = async (req, res) => {

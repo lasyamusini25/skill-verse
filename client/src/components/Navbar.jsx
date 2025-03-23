@@ -1,15 +1,17 @@
-import { useContext } from 'react';
+import { useState, useContext } from 'react';
 import { assets } from '../assets/assets';
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { Briefcase, Sparkles, UserCircle } from 'lucide-react';
+import RecruiterLogin from './RecruiterLogin'; // Import the pop-up component
 
 const Navbar = () => {
     const { openSignIn } = useClerk();
     const { user } = useUser();
     const navigate = useNavigate();
     const { setShowRecruiterLogin } = useContext(AppContext);
+    const [showRecruiterPopup, setShowRecruiterPopup] = useState(false); // State for pop-up visibility
 
     return (
         <div className='shadow-md py-4 bg-blue-100'>
@@ -36,17 +38,27 @@ const Navbar = () => {
                         </div>
                     ) : (
                         <div className='flex gap-4 max-sm:text-xs'>
-                            <button onClick={() => setShowRecruiterLogin(true)} className='text-gray-700 hover:text-blue-600 transition'>
+                            <button 
+                                onClick={() => setShowRecruiterPopup(true)} 
+                                className='text-gray-700 hover:text-blue-600 transition'
+                            >
                                 Recruiter Login
                             </button>
-                            <button onClick={() => openSignIn()} className='bg-blue-600 text-white px-6 sm:px-9 py-2 rounded-full shadow-lg hover:bg-blue-500 transition'>
+                            <button 
+                                onClick={() => openSignIn()} 
+                                className='bg-blue-600 text-white px-6 sm:px-9 py-2 rounded-full shadow-lg hover:bg-blue-500 transition'
+                            >
                                 Login 🚀
                             </button>
                         </div>
                     )
                 }
-
             </div>
+
+            {/* Pop-up for Recruiter Login */}
+            {showRecruiterPopup && (
+                <RecruiterLogin setShowRecruiterLogin={setShowRecruiterPopup} />
+            )}
         </div>
     );
 };
